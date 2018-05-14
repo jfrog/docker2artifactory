@@ -1,0 +1,9 @@
+#IJ files
+.idea/*
+*.iml
+
+# Compiled files
+*.pyc
+
+workdir/*
+venv/*

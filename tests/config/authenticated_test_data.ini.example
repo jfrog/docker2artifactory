@@ -1,0 +1,9 @@
+[Registry]
+registryurl=https://registry-1.docker.io
+registryuser=SET_USER
+registrypassword=SET_PASSWORD
+
+[Repository]
+imagenamespace=SET_NAMESPACE
+imagename=SET_IMAGE_NAME
+imagetag=SET_TAG

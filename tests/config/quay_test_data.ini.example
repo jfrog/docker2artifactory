@@ -1,0 +1,5 @@
+[Quay]
+namespace=SET_NAMESPACE
+token=SET_TOKEN
+imagename=SET_IMAGENAME
+imagetag=SET_IMAGETAG
