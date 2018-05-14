@@ -1,0 +1,9 @@
+[Registry]
+registryurl=SET_REGISTRY_URL
+registryuser=SET_RESGISTRY_USER
+registrypassword=SET_REGISTRY_PASSWORD
+
+[Repository]
+imagenamespace=SET_IMAGE_NAMESPACE
+imagename=SET_IMAGE_NAME
+imagetag=SET_IMAGE_TAG
