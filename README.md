@@ -15,6 +15,7 @@ This tool is designed to ease the transition from 3rd party V2 Docker registries
 ## Security Migration (Users, Groups and Permissions)
 
 * Docker EE (UCP and DTR)
+* Quay EE
 
 ## Requirements
 
