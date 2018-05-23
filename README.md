@@ -15,8 +15,8 @@ This tool is designed to ease the transition from 3rd party V2 Docker registries
 
 ## Security Migration (Users, Groups and Permissions)
 
-* Docker EE (UCP and DTR)
-* Quay EE
+* [Docker EE (UCP and DTR)](#docker-ee-security-migration)
+* [Quay EE](#quay-ee-security-migration)
 
 ## Requirements
 
@@ -205,7 +205,7 @@ This will produce an output like this:
 docker login -u AWS -p password https://aws_account_id.dkr.ecr.us-east-1.amazonaws.com
 ```
 
-The token you need to supply to this tool is the *password* from above, the URL will be the URL provided above (in this example the token would be password and the URL  https://aws_account_id.dkr.ecr.us-east-1.amazonaws.com).
+The token you need to supply to this tool is the *password* from above, the source will be the URL provided above (in this example the token would be password and the source https://aws_account_id.dkr.ecr.us-east-1.amazonaws.com).
 
 #### Input
 
