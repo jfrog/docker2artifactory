@@ -12,6 +12,7 @@ This tool is designed to ease the transition from 3rd party V2 Docker registries
 * [Quay (SaaS)](#quay-registry-migrator)
 * [Quay EE (Enterprise Edition)](#quay-enterprise-edition-registry-migrator)
 * [ECR](#amazon-ecr-registry-migrator)
+* [GCR](#google-container-registry-migrator)
 
 ## Security Migration (Users, Groups and Permissions)
 
@@ -241,6 +242,46 @@ artifactory:
   repo                  The docker repository
 ```
 
+
+### Google Container Registry migrator
+The GCR migrator works against Google's GCR service. The this tool has two modes of operation, auto-discovery and guided migrations. In auto-discovery mode, the tool will query the source registry (using standard Docker registry apis) to get a full listing of all the available image names and tags. It will then migrate all of the images it finds. In the guided mode, you provide a list of image names and tags you wish to migrate (see [Image file format](#image-file-format))
+
+#### Getting the JSON key file
+
+You will need a [JSON key file](https://support.google.com/cloud/answer/6158849#serviceaccounts) with the correct permissions to perform the migration. If you do not already have one, follow [Google's Advanced Authentication document]((https://cloud.google.com/container-registry/docs/advanced-authentication#using_a_json_key_file).
+
+#### Input
+
+```bash
+usage: python DockerMigrator.py gcr [-h] [--source SOURCE] [--ignore-certs]
+                                    [--overwrite] [--num-of-workers WORKERS]
+                                    [-v] [--image-file IMAGE_FILE]
+                                    keyfile artifactory username password repo
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --ignore-certs        Ignore any certificate errors from both source and
+                        destination
+  --overwrite           Overwrite existing image/tag on the destination
+  --num-of-workers WORKERS
+                        Number of worker threads. Defaults to 2.
+  -v, --verbose         Make the operation more talkative
+  --image-file IMAGE_FILE
+                        Limit the import to a set of images in the provided
+                        file. Format of new line separated file: '<image-
+                        name>:<tag>' OR '<image-name>' to import all tags of
+                        that repository.
+
+source:
+  --source SOURCE       The source registry URL (defaults to https://gcr.io)
+  keyfile               The Google JSON key file
+
+artifactory:
+  artifactory           The destination Artifactory URL
+  username              The username to use for authentication to Artifactory
+  password              The password to use for authentication to Artifactory
+  repo                  The docker repository
+```
 
 ### Image file format
 The image file format accepts two types of entries. The first is specifying an image and optionally a namespace. The second is specifying an image (and optional a namespace) and a tag. When the first option is used (no tag is specified), the tool will migrate ALL the tags for that particular image name.

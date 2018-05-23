@@ -82,6 +82,19 @@ def get_arg_parser():
     add_extra_args(parser_ecr)
     parser_ecr.set_defaults(func=ecr_migration)
 
+    # GCR
+    parser_gcr = subparsers.add_parser('gcr', help='A tool to migrate from Google Container Registry (GCR)')
+    # Source registry access
+    source_group = parser_gcr.add_argument_group('source')
+    source_group.add_argument('--source', help='The source registry URL (defaults to https://gcr.io)',
+                              default='https://gcr.io')
+    source_group.add_argument('keyfile', help='The Google JSON key file')
+    # Artifactory access
+    add_art_access(parser_gcr)
+    # Extra options
+    add_extra_args(parser_gcr)
+    parser_gcr.set_defaults(func=gcr_migration)
+
     # QUAY
     parser_quay = subparsers.add_parser('quay', help='A tool specifically for Quay SaaS')
     quay = parser_quay.add_argument_group('source')
@@ -138,8 +151,18 @@ def parse_image_file(file_path):
                     image_names.append(line)
         return image_names, images
     except Exception as ex:
-        logging.error("Unable to read in image file '%s' due to %s" % (file_path, ex.message))
+        logging.error("Unable to read in image file '%s' due to %s" % (file_path, str(ex)))
         return [], []
+
+def parse_key_file(file_path):
+    try:
+        with open(file_path) as f:
+            content = f.read()
+            return content
+    except Exception as ex:
+        logging.error("Unable to read in key file '%s' due to %s" % (file_path, str(ex)))
+        return None
+
 
 '''
     Generic migration for a V2 token based Docker registry
@@ -157,6 +180,7 @@ def generic_migration(args, work_dir):
     source = DockerRegistryAccess(url=args.source, username=args.source_username, password=args.source_password,
                                   ignore_cert=args.ignore_cert)
     common_migration(args, work_dir, source)
+
 '''
     ECR migration
     @param args - The user provided arguments
@@ -171,6 +195,21 @@ def ecr_migration(args, work_dir):
                                   ignore_cert=args.ignore_cert)
     common_migration(args, work_dir, source)
 
+'''
+    GCR migration
+    @param args - The user provided arguments
+    @param work_dir - The temporary work directory
+'''
+def gcr_migration(args, work_dir):
+    if args.workers < MIN_NUM_OF_WORKERS or args.workers > MAX_NUM_OF_WORKERS:
+        parser.error("--num-of-workers must be between %d and %d." % (MIN_NUM_OF_WORKERS, MAX_NUM_OF_WORKERS))
+    password = parse_key_file(args.keyfile)
+    if not password:
+        sys.exit("Unable to read key file or key is empty.")
+    # Set up and verify the connection to the source registry
+    source = DockerRegistryAccess(url=args.source, username='_json_key', password=password, method='basic',
+                                  ignore_cert=args.ignore_cert)
+    common_migration(args, work_dir, source)
 
 '''
     Common migration procedure
