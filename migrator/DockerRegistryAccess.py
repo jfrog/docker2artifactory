@@ -4,6 +4,7 @@ from DockerTokenAccess import DockerTokenAccess
 import re
 import hashlib
 import logging
+import json
 
 
 '''
@@ -11,9 +12,14 @@ import logging
     Features include:
       * The ability to get a token
       * The ability to get an image
+      
+    @param url - The URL of the registry
+    @param username - The username for token/basic auth
+    @param password - The password for token/basic auth
+    @param method - The access method [token, basic] (Defaults to token)
 '''
 class DockerRegistryAccess:
-    def __init__(self, url, username=None, password=None, ignore_cert=False):
+    def __init__(self, url, username=None, password=None, method=None, ignore_cert=False):
         self.url = url.rstrip('/')
         self.username = username
         self.password = password
@@ -21,8 +27,23 @@ class DockerRegistryAccess:
         self.CHUNK = 16 * 1024
         self.log = logging.getLogger(__name__)
         self.link_reg_ex = re.compile('<(.*)>;.*rel="next"')
-        self.access = HTTPAccess(url=self.url, ignore_cert=self.ignore_cert)
-        self.token_access = DockerTokenAccess(url=self.url, username=self.username, password=self.password, ignore_cert=self.ignore_cert)
+        self.anon_access = HTTPAccess(url=self.url, ignore_cert=self.ignore_cert)
+        self.valid_methods = ['token', 'basic']
+        if not method:
+            self.method = 'token'
+        else:
+            if method not in self.valid_methods:
+                raise ValueError("Invalid method '%s' for DockerRegistryAccess" % method)
+            self.method = method
+
+        if self.method == 'token':
+            self.token_access = DockerTokenAccess(url=self.url, username=self.username, password=self.password,
+                                                  ignore_cert=self.ignore_cert)
+            self.access = self.token_access
+        elif self.method == 'basic':
+            self.basic_access = HTTPAccess(url=self.url, username=username, password=password,
+                                           ignore_cert=self.ignore_cert)
+            self.access = self.basic_access
 
     '''
         Verifies that the repository is a valid V2 repository
@@ -31,7 +52,7 @@ class DockerRegistryAccess:
         self.log.info("Verify Registry is V2")
         try:
             # Perform request without credentials
-            response, status = self.access.do_unprocessed_request('GET', '/v2/')
+            response, status = self.anon_access.do_unprocessed_request('GET', '/v2/')
             return response and response.headers['Docker-Distribution-API-Version']
         except Exception as ex:
             self.log.info(ex.message)
@@ -43,11 +64,12 @@ class DockerRegistryAccess:
         @param path - (optional) The endpoint for the catalog (used for paging)
     '''
     def get_catalog(self, path='/v2/_catalog'):
-        # Some registries allow access to the catalog anonymously but if the user provided credentials, we need to try
-        # it with the credentials or we may be missing certain images only that user can use.
-        if self.username and self.password and not self.token_access.has_token():
-            self.token_access.populate_generic_token()
-        out = self.token_access.get_call_wrapper(path)
+        if self.method == 'token':
+            # Some registries allow access to the catalog anonymously but if the user provided credentials, we need to try
+            # it with the credentials or we may be missing certain images only that user can use.
+            if self.username and self.password and not self.token_access.has_token():
+                self.token_access.populate_generic_token()
+        out = self.access.get_code_and_msg_wrapper(path)
         if not out:
             return False
         output, response = out
@@ -55,6 +77,10 @@ class DockerRegistryAccess:
         if code != 200:
             self.log.error("Unable to get a listing of the upstream images. Catalog call returned: %d." % code)
             return False
+        # Workaround for ECR returning wrong content-type
+        if isinstance(output, basestring):
+            output = json.loads(output)
+        # END Workaround
         if response and 'link' in response.headers:
             link_value = response.headers['link']
             results = self.link_reg_ex.findall(link_value)
@@ -70,9 +96,9 @@ class DockerRegistryAccess:
     '''
     def get_tags(self, image, path=None):
         if not path:
-            out = self.token_access.get_call_wrapper("/v2/" + image + "/tags/list")
+            out = self.access.get_code_and_msg_wrapper("/v2/" + image + "/tags/list")
         else:
-            out = self.token_access.get_call_wrapper(path)
+            out = self.access.get_code_and_msg_wrapper(path)
         if not out:
             return False
         output, response = out
@@ -81,6 +107,10 @@ class DockerRegistryAccess:
             self.log.error("Unable to get a listing of the tags for image '%s'. Tags call returned: %d."
                            % (image, code))
             return False
+        # Workaround for ECR returning wrong content-type
+        if isinstance(output, basestring):
+            output = json.loads(output)
+        # END Workaround
         if response and 'link' in response.headers:
             link_value = response.headers['link']
             results = self.link_reg_ex.findall(link_value)
@@ -100,7 +130,7 @@ class DockerRegistryAccess:
             'Accept': 'application/vnd.docker.distribution.manifest.v2+json, '
                       'application/vnd.docker.distribution.manifest.v1+json, application/json'
         }
-        response = self.token_access.get_raw_call_wrapper(url="/v2/" + image + "/manifests/" + reference, headers=headers)
+        response = self.access.get_raw_call_wrapper(url="/v2/" + image + "/manifests/" + reference, headers=headers)
         if response.getcode() == 200:
             try:
                 with open(file, 'wb') as f:
@@ -119,7 +149,7 @@ class DockerRegistryAccess:
         @param file - The file to store the contents into
     '''
     def download_layer(self, image, layer, file):
-        response = self.token_access.get_raw_call_wrapper(url="/v2/" + image + "/blobs/" + layer)
+        response = self.access.get_raw_call_wrapper(url="/v2/" + image + "/blobs/" + layer)
         # Write the contents into a file and verify the sha256 while we are at it
         if response.getcode() == 200:
             try:
@@ -178,5 +208,6 @@ class DockerRegistryAccess:
         Create a deep copy of this object
     '''
     def __deepcopy__(self, memo):
-        return DockerRegistryAccess(self.url, self.username, self.password, self.ignore_cert)
+        return DockerRegistryAccess(url=self.url, username=self.username, password=self.password, method=self.method,
+                                    ignore_cert=self.ignore_cert)
 

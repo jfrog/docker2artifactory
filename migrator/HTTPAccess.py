@@ -51,6 +51,38 @@ class HTTPAccess(object):
         except Exception as ex:
             return False
 
+    '''
+        Perform a GET request to the specified url (path) with the specified headers.
+        Interprets the result into a more python friendly form. Includes 
+        @param url - The url path to perform the request on
+        @param headers - The headers to add to the call
+    '''
+    def get_code_and_msg_wrapper(self, url, headers=None):
+        if not headers:
+            headers = {}
+        response = self.get_raw_call_wrapper(url, headers)
+        if response:
+            return self.process_response(response), response
+        return False
+
+
+    '''
+        Perform a GET request to the specified url (path) with the specified headers.
+        Provides the raw response
+        @param url = The url path to perform the request on
+        @param headers - The headers to add to the call
+    '''
+    def get_raw_call_wrapper(self, url, headers=None):
+        if not headers:
+            headers = {}
+        try:
+            response, stat = self.do_unprocessed_request(method='GET', path=url, headers=headers)
+            return response
+        except Exception as ex:
+            self.log.error("While performing GET request for '%s':  %s" % (url, ex.message))
+            return False
+
+
 
     # Helper REST method
     def dorequest(self, method, path, body=None, headers=None):

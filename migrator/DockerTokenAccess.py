@@ -32,13 +32,14 @@ class DockerTokenAccess(HTTPAccess):
         @param headers - The headers to add to the call
         @param tries - The number of tries to try to reauth
     '''
-    def get_call_wrapper(self, url, headers=None, tries=1):
+    def get_code_and_msg_wrapper(self, url, headers=None, tries=1):
         if not headers:
             headers = {}
         response = self.get_raw_call_wrapper(url, headers, tries)
         if response:
             return self.process_response(response), response
         return False
+
 
     '''
         Perform a GET request to the specified url (path) with the specified headers.
