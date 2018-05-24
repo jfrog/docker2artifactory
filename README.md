@@ -248,7 +248,7 @@ The GCR migrator works against Google's GCR service. The this tool has two modes
 
 #### Getting the JSON key file
 
-You will need a [JSON key file](https://support.google.com/cloud/answer/6158849#serviceaccounts) with the correct permissions to perform the migration. If you do not already have one, follow [Google's Advanced Authentication document]((https://cloud.google.com/container-registry/docs/advanced-authentication#using_a_json_key_file).
+You will need a [JSON key file](https://support.google.com/cloud/answer/6158849#serviceaccounts) with the correct permissions to perform the migration. If you do not already have one, follow [Google's Advanced Authentication document](https://cloud.google.com/container-registry/docs/advanced-authentication#using_a_json_key_file).
 
 #### Input
 
