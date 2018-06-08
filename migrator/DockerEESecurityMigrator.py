@@ -133,11 +133,13 @@ class DockerEESecurityMigrator(object):
     def __create_permissions(self):
         print "Migrating permissions..."
         for permission in self.repository_permissions:
-            permission_exists = self.art_access.permission_exists(permission)
+            permission_pattern=permission
+            permission_name=permission.replace('/', '-')
+            permission_exists = self.art_access.permission_exists(permission_name)
             if not self.overwrite and permission_exists:
-                self.log.info("Permission %s exists. Skipping...", permission)
+                self.log.info("Permission %s exists. Skipping...", permission_name)
             else:
-                self.log.info("Creating permission %s", permission)
+                self.log.info("Creating permission %s", permission_name)
                 groups = {}
                 for scope in self.repository_permissions[permission]:
                     art_permissions = ['r']
@@ -149,9 +151,9 @@ class DockerEESecurityMigrator(object):
                         groups[group] = art_permissions
 
                 self.log.info("Groups: %s", groups)
-                permission_created = self.art_access.create_permission(permission,
+                permission_created = self.art_access.create_permission(permission_name,
                     [self.repository], groups=groups,
-                    include_pattern=permission + '/**')
+                    include_pattern=permission_pattern + '/**')
                 if not permission_created:
                     raise Exception("Failed to create permission.")
                 self.__increment_counter('permissions')
