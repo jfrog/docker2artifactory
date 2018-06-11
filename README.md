@@ -8,7 +8,7 @@ This tool is designed to ease the transition from 3rd party V2 Docker registries
 ## Data Migration
 
 * [Token based registries](#generic-registry-migrator)
-* [Anonynous access registries](#generic-registry-migrator)
+* [Anonymous access registries](#generic-registry-migrator)
 * [Quay (SaaS)](#quay-registry-migrator)
 * [Quay EE (Enterprise Edition)](#quay-enterprise-edition-registry-migrator)
 * [ECR](#amazon-ecr-registry-migrator)
