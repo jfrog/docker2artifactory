@@ -24,7 +24,7 @@ class UCPAccess(DockerEEHTTPAccess):
         @return None if there was an error, else the a list of available organizations
     '''
     def get_organizations(self):
-        return super(UCPAccess, self).get_with_pagination('accounts/', 'accounts', 'name', self.__get_organizations_page_handler)
+        return super(UCPAccess, self).get_with_pagination('/accounts/', 'accounts', 'name', self.__get_organizations_page_handler)
 
     def __get_organizations_page_handler(self, result, page_results):
         for account in page_results:
@@ -36,7 +36,7 @@ class UCPAccess(DockerEEHTTPAccess):
         @return None if there was an error, else the a list of available team of a given organization
     '''
     def get_users(self):
-        return super(UCPAccess, self).get_with_pagination('accounts/', 'accounts', 'name', self.__get_users_page_handler)
+        return super(UCPAccess, self).get_with_pagination('/accounts/', 'accounts', 'name', self.__get_users_page_handler)
 
     def __get_users_page_handler(self, result, page_results):
         for account in page_results:
@@ -49,7 +49,7 @@ class UCPAccess(DockerEEHTTPAccess):
     '''
     def get_teams(self, organization):
         org_encoded = urllib.quote_plus(organization)
-        return super(UCPAccess, self).get_with_pagination("accounts/" + org_encoded + "/teams/", 'teams', 'name', self.__get_teams_page_handler)
+        return super(UCPAccess, self).get_with_pagination("/accounts/" + org_encoded + "/teams/", 'teams', 'name', self.__get_teams_page_handler)
 
     def __get_teams_page_handler(self, result, page_results):
         for team in page_results:
@@ -62,7 +62,7 @@ class UCPAccess(DockerEEHTTPAccess):
     def get_members(self, organization, team):
         org_encoded = urllib.quote_plus(organization)
         team_encoded = urllib.quote_plus(team)
-        return super(UCPAccess, self).get_with_pagination("accounts/" + org_encoded + "/teams/" + team + "/members/", 'members', 'member.id', self.__get_members_page_handler)
+        return super(UCPAccess, self).get_with_pagination("/accounts/" + org_encoded + "/teams/" + team + "/members/", 'members', 'member.id', self.__get_members_page_handler)
 
     def __get_members_page_handler(self, result, page_results):
         for member in page_results:

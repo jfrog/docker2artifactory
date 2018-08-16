@@ -1,5 +1,6 @@
 from HTTPAccess import HTTPAccess
 import logging
+import re
 '''
     Simple API for accessing Docker EE resources
 '''
@@ -25,7 +26,8 @@ class DockerEEHTTPAccess(HTTPAccess):
         if (order):
             page_path = page_path + '&order=' + order
         if (start):
-            page_path = page_path + '&' + pageStartQueryParam + '=' + str(start)
+            page_path = u''.join((page_path + '&' + pageStartQueryParam + '=', start)).encode('utf-8')
+            page_path = urlEncodeNonAscii(page_path)
         page_results = self.get_call_wrapper(page_path)[attribute]
         if (start and page_results):
             page_results.pop(0)
@@ -37,3 +39,6 @@ class DockerEEHTTPAccess(HTTPAccess):
         for part in parts:
             result = result[part]
         return result
+
+def urlEncodeNonAscii(b):
+    return re.sub('[\x80-\xFF]', lambda c: '%%%02x' % ord(c.group(0)), b)
