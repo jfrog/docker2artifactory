@@ -22,6 +22,7 @@ This tool is designed to ease the transition from 3rd party V2 Docker registries
 ## Requirements
 
 * Artifactory 4.4.3+
+    * JCR 6.15.0+ - Data migration only, security migration not supported 
 * Python 2 (tested on 2.7) **or** Docker with internet access
 
 ---
