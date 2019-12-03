@@ -135,6 +135,10 @@ class ArtifactoryDockerAccess(ArtifactoryBaseAccess):
         if msg and 'packageType' in msg and msg['packageType'] == 'docker':
             if 'dockerApiVersion' in msg and msg['dockerApiVersion'] == "V2":
                 return True
+        # JCR does not support the api/repositories call, so try a different way to verify
+        msg = self.get_call_wrapper("/api/docker/%s/v2/_catalog" % self.repo)
+        if msg and 'repositories' in msg:
+            return True
         return False
 
     '''
