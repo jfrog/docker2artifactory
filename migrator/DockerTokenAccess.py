@@ -5,7 +5,7 @@ import logging
 
 class DockerTokenAccess(HTTPAccess):
     def __init__(self, url, username=None, password=None, ignore_cert=False, exlog=False):
-        super(DockerTokenAccess, self).__init__(url, ignore_cert, exlog) # Don't want basic auth
+        super(DockerTokenAccess, self).__init__(url=url, ignore_cert=ignore_cert, exlog=exlog) # Don't want basic auth
         self.log = logging.getLogger(__name__)
         self.username = username
         self.password = password
