@@ -25,8 +25,31 @@ class ArtifactoryBaseAccess(HTTPAccess):
     def is_valid_version(self):
         return LooseVersion(self.version) >= LooseVersion("4.4.3")
 
+    '''
+        Get the version of the connected Artifactory
+    '''
     def get_version(self):
         return self.version
+
+    '''
+        Let Artifactory know this tool is being used
+    '''
+    def report_usage(self, registry):
+        self.log.info("Usage call")
+        body = {
+            "productId": "Docker2Artifactory/1.0.0",
+            "features": [
+                {
+                    "featureId": "Registry/%s" % registry
+                }
+            ]
+        }
+        #  This is not a vital operation, app should ignore any failures here
+        try:
+            response = self.dorequest('POST', '/api/system/usage', body)
+        except Exception as ex:
+            self.log.info("Exception caught when executing usage command: %s", ex)
+
 
     '''
         Get the artifactory version
