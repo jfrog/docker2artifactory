@@ -82,6 +82,7 @@ def get_arg_parser():
     add_extra_args(parser_ecr)
     parser_ecr.set_defaults(func=ecr_migration)
 
+
     # GCR
     parser_gcr = subparsers.add_parser('gcr', help='A tool to migrate from Google Container Registry (GCR)')
     # Source registry access
@@ -169,7 +170,7 @@ def parse_key_file(file_path):
     @param args - The user provided arguments
     @param work_dir - The temporary work directory
 '''
-def generic_migration(args, work_dir):
+def generic_migration(args, work_dir, registry="generic"):
     # Verify the more intricate argument requirements
     if bool(args.source_username) != bool(args.source_password):
         parser.error("--source-username and --source-password must both be provided or neither.")
@@ -179,7 +180,7 @@ def generic_migration(args, work_dir):
     # Set up and verify the connection to the source registry
     source = DockerRegistryAccess(url=args.source, username=args.source_username, password=args.source_password,
                                   ignore_cert=args.ignore_cert)
-    common_migration(args, work_dir, source)
+    common_migration(args, work_dir, source, registry)
 
 '''
     ECR migration
@@ -193,7 +194,7 @@ def ecr_migration(args, work_dir):
     # Set up and verify the connection to the source registry
     source = DockerRegistryAccess(url=args.source, username='AWS', password=args.token, method='basic',
                                   ignore_cert=args.ignore_cert)
-    common_migration(args, work_dir, source)
+    common_migration(args, work_dir, source, "ecr")
 
 '''
     GCR migration
@@ -209,7 +210,7 @@ def gcr_migration(args, work_dir):
     # Set up and verify the connection to the source registry
     source = DockerRegistryAccess(url=args.source, username='_json_key', password=password, method='basic',
                                   ignore_cert=args.ignore_cert)
-    common_migration(args, work_dir, source)
+    common_migration(args, work_dir, source, "gcr")
 
 '''
     Common migration procedure
@@ -217,7 +218,7 @@ def gcr_migration(args, work_dir):
     @param work_dir - The temporary work directory
     @param source - The source access
 '''
-def common_migration(args, work_dir, source):
+def common_migration(args, work_dir, source, registry="NA"):
     if not source.verify_is_v2():
         sys.exit("The provided URL does not appear to be a valid V2 repository.")
 
@@ -243,7 +244,7 @@ def common_migration(args, work_dir, source):
         populate_tags(image_names, source, q)
     if not q.empty():
         # Perform the migration
-        perform_migration(source, art_access, q, work_dir)
+        perform_migration(source, art_access, q, work_dir, registry)
     else:
         print "Nothing to migrate."
 
@@ -294,8 +295,9 @@ def populate_tags(image_names, source, q):
     @param q - The queue of (image, tag) tuples that have to be migrated
     @param work_dir - The temporary working directory
 '''
-def perform_migration(source, art_access, q, work_dir):
+def perform_migration(source, art_access, q, work_dir, registry="NA"):
     print "Performing migration for %d image/tags." % q.qsize()
+    art_access.report_usage(registry)
     m = Migrator(source, art_access, q, args.workers, args.overwrite, work_dir)
     m.migrate()
     print "Migration finished."
@@ -337,7 +339,7 @@ def quay_migration(args, work_dir):
         populate_tags(image_names, source, q)
     if not q.empty():
         # Perform the migration
-        perform_migration(source, art_access, q, work_dir)
+        perform_migration(source, art_access, q, work_dir, "quay")
     else:
         print "Nothing to migrate."
 
@@ -353,7 +355,7 @@ def quay_ee_migration(args, work_dir):
         # Transform the token into username/password
         args.source_username = "$oauthtoken"
         args.source_password = args.token
-    generic_migration(args, work_dir)
+    generic_migration(args, work_dir, "quayee")
 
 def setup_logging(level):
     fmt = "%(asctime)s [%(threadName)s] [%(levelname)s]"
