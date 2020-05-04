@@ -218,6 +218,7 @@ def gcr_migration(args, work_dir):
     @param args - The user provided arguments
     @param work_dir - The temporary work directory
     @param source - The source access
+    @registry - The source registry (for info only)
 '''
 def common_migration(args, work_dir, source, registry="NA"):
     if not source.verify_is_v2():
