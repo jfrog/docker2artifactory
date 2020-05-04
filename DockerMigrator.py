@@ -169,6 +169,7 @@ def parse_key_file(file_path):
     Generic migration for a V2 token based Docker registry
     @param args - The user provided arguments
     @param work_dir - The temporary work directory
+    @registry - The source registry (for info only)
 '''
 def generic_migration(args, work_dir, registry="generic"):
     # Verify the more intricate argument requirements
@@ -294,6 +295,7 @@ def populate_tags(image_names, source, q):
     @param art_access - Access to the Artifactory destination
     @param q - The queue of (image, tag) tuples that have to be migrated
     @param work_dir - The temporary working directory
+    @registry - The source registry (for info only)
 '''
 def perform_migration(source, art_access, q, work_dir, registry="NA"):
     print "Performing migration for %d image/tags." % q.qsize()
