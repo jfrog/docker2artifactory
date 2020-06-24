@@ -411,6 +411,7 @@ This project uses Python's [unittest framework][]. To run the tests, you can use
 
 ## Setup
 1. Copy the tests/config/*.example to tests/config/* and populate the properties
+2. Add an Artifactory license to tests/config/artifactory.lic
 
 To run the unit tests from the command line (requires Python 2.7):
 
