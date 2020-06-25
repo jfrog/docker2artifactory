@@ -8,6 +8,7 @@ import util.DockerMigratorUtil as DockerMigratorUtil
 import util.ConfigUtil as ConfigUtil
 import sys
 
+@unittest.skip("Require work for generic use.")
 class QuayMigrationTest(unittest.TestCase):
 
     def setUp(self):

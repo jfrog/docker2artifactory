@@ -9,6 +9,7 @@ import util.ConfigUtil as ConfigUtil
 import sys
 import tempfile
 
+@unittest.skip("Require work for generic use.")
 class AuthenticatedGenericMigrationTest(unittest.TestCase):
 
     def setUp(self):

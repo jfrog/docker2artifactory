@@ -5,6 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from migrator import UCPAccess
 from migrator import DTRAccess
 
+@unittest.skip("Require work for generic use.")
 class DockerEEAccessTest(unittest.TestCase):
 
     def setUp(self):

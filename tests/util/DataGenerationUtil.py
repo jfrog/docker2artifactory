@@ -23,7 +23,7 @@ class DataGenerationUtil:
                                     buildnumber, baseimage, registry, username, password):
         self.log.info('Generating ' + str(numpackages * numversions) + ' (' + str(numpackages) + ' * ' + str(numversions) + ') docker images...')
         fixed_registry = self.fix_docker_host_hostname(registry)
-        generatorimage = 'solengha-dockerv2.jfrog.io/soldev/qa/docker-generator:generic'
+        generatorimage = 'partnership-public-images.jfrog.io/qa/docker-generator:0.1'
         call (['docker', 'pull', generatorimage])
         call(['docker', 'run', '--rm', '--privileged',
             '-e', 'DNAME=' + name,

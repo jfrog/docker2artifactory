@@ -8,6 +8,7 @@ from migrator import DTRAccess
 from migrator import DockerEESecurityMigrator
 from migrator import ArtifactoryUserAccess
 
+@unittest.skip("Require work for generic use.")
 class DockerEESecurityMigratorTest(unittest.TestCase):
 
     def setUp(self):
