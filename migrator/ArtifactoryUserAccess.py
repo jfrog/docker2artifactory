@@ -42,6 +42,30 @@ class ArtifactoryUserAccess(ArtifactoryBaseAccess):
         return False
 
     '''
+        Creates or replaces a user with the specified username
+        @param username - The user to add to the group
+        @param group - The group to add the user to
+    '''
+    def add_user_to_group(self, username, group):
+        user_details = self.get_call_wrapper('/api/security/users/%s' % username)
+        if not user_details:
+            self.log.error("Unable to retrieve user %s" % username)
+        if not user_details['groups']:
+            user_details['groups'] = []
+
+        # If already in the group, don't try to add it again
+        if group in user_details['groups']:
+            return
+
+        user_details['groups'].append(group)
+
+        resp, stat = self.do_unprocessed_request(method='POST', path='/api/security/users/' + username, body=user_details)
+        if stat == 201:
+            return True
+        self.log.warn("Failed to update user with status %s: %s", stat, resp)
+        return False
+
+    '''
         Return true if the groups exists
         @param name - The group name to check for
     '''

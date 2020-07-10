@@ -37,3 +37,7 @@ class DockerEEHTTPAccess(HTTPAccess):
         for part in parts:
             result = result[part]
         return result
+
+    def userExists(self, username):
+        return self.get_call_wrapper('/accounts/%s' % username) is not False
+

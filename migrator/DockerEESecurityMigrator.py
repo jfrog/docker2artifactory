@@ -104,6 +104,9 @@ class DockerEESecurityMigrator(object):
         for user in self.users:
             if user not in self.ignored_users:
                 user_exists = self.art_access.user_exists(user)
+                if user in self.users_groups:
+                    for group in self.users_groups[user]:
+                        self.art_access.add_user_to_group(user, group)
                 if not self.overwrite and user_exists:
                     self.log.info("User %s exists. Skipping...", user)
                 else:

@@ -38,12 +38,12 @@ class UCPAccess(DockerEEHTTPAccess):
     '''
     def get_users(self, artifactory_users):
         self.artifactory_users = artifactory_users
-        return super(UCPAccess, self).get_with_pagination('accounts/', 'accounts', 'name', self.__get_users_page_handler)
-
-    def __get_users_page_handler(self, result, page_results):
-        for account in page_results:
-            if account['isOrg'] == False and account['name'] in self.artifactory_users:
-                result.append(account['name'])
+        users = []
+        for user in artifactory_users:
+            if self.userExists(user):
+                self.log.info("Found '%s' user in UCP and Artifactory" % user)
+                users.append(user)
+        return users
 
     '''
         Get the list of all teams of a given organizations
