@@ -12,6 +12,7 @@ class UCPAccess(DockerEEHTTPAccess):
     def __init__(self, url, username=None, password=None, ignore_cert=False, exlog=False):
         super(UCPAccess, self).__init__(url, username, password, ignore_cert, exlog)
         self.log = logging.getLogger(__name__)
+        self.artifactory_users = []
 
     '''
         Test connection with UCP
@@ -35,12 +36,13 @@ class UCPAccess(DockerEEHTTPAccess):
         Gets the list of all users
         @return None if there was an error, else the a list of available team of a given organization
     '''
-    def get_users(self):
+    def get_users(self, artifactory_users):
+        self.artifactory_users = artifactory_users
         return super(UCPAccess, self).get_with_pagination('accounts/', 'accounts', 'name', self.__get_users_page_handler)
 
     def __get_users_page_handler(self, result, page_results):
         for account in page_results:
-            if account['isOrg'] == False and account['isActive'] == True:
+            if account['isOrg'] == False and account['name'] in self.artifactory_users:
                 result.append(account['name'])
 
     '''

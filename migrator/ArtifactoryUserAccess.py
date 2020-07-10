@@ -118,3 +118,14 @@ class ArtifactoryUserAccess(ArtifactoryBaseAccess):
             return True
         self.log.warn("Failed to create permission with status %s: %s", stat, resp)
         return False
+
+    '''
+        Returns the full list of all users in the Artifactory instance
+    '''
+    def get_users(self):
+        self.log.info("Getting a list of all Artifactory users")
+        users = []
+        results = self.get_call_wrapper('/api/security/users')
+        if results and len(results) > 0:
+            users = [o['name'] for o in results]
+        return users

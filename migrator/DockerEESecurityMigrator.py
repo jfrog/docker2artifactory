@@ -24,6 +24,7 @@ class DockerEESecurityMigrator(object):
         self.groups = []
         self.users_groups = {}
         self.repository_permissions = {}
+        self.permission_name_prefix='dtr-'
 
     '''
         Migrate security data from UCP and DTR to Artifactory
@@ -53,7 +54,8 @@ class DockerEESecurityMigrator(object):
     def __fetch_source_data(self):
         print "Fetching data from sources..."
         self.log.info("Fetching users data...")
-        self.users = self.ucp_access.get_users()
+        art_users = self.art_access.get_users()
+        self.users = self.ucp_access.get_users(art_users)
         self.log.info("Fetching organizations...")
         self.organizations = self.ucp_access.get_organizations()
         for organization in self.organizations:
@@ -105,6 +107,9 @@ class DockerEESecurityMigrator(object):
                 if not self.overwrite and user_exists:
                     self.log.info("User %s exists. Skipping...", user)
                 else:
+                    self.log.error("We should not get here since we are only doing existing users..")
+                    pass
+                    '''
                     self.log.info("Creating user %s", user)
                     groups = None
                     if user in self.users_groups:
@@ -114,13 +119,15 @@ class DockerEESecurityMigrator(object):
                     if not user_created:
                         raise Exception("Failed to create user.")
                     self.__increment_counter('users')
+                    '''
 
-                permission_exists = self.art_access.permission_exists(user)
+                permission_name=self.permission_name_prefix + user
+                permission_exists = self.art_access.permission_exists(permission_name)
                 if not self.overwrite and permission_exists:
-                    self.log.info("Permission %s exists. Skipping...", user)
+                    self.log.info("Permission %s exists. Skipping...", permission_name)
                 else:
-                    self.log.info("Creating permission %s", user)
-                    permission_created = self.art_access.create_permission(user,
+                    self.log.info("Creating permission %s", permission_name)
+                    permission_created = self.art_access.create_permission(permission_name,
                         [self.repository], users={user: ["d","w","n","r","m"]},
                         include_pattern=user + '/**')
                     if not permission_created:
@@ -134,7 +141,7 @@ class DockerEESecurityMigrator(object):
         print "Migrating permissions..."
         for permission in self.repository_permissions:
             permission_pattern=permission
-            permission_name=permission.replace('/', '-')
+            permission_name=self.permission_name_prefix + permission.replace('/', '-')
             permission_exists = self.art_access.permission_exists(permission_name)
             if not self.overwrite and permission_exists:
                 self.log.info("Permission %s exists. Skipping...", permission_name)
