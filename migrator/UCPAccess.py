@@ -63,8 +63,8 @@ class UCPAccess(DockerEEHTTPAccess):
     '''
     def get_members(self, organization, team):
         org_encoded = urllib.quote_plus(organization)
-        team_encoded = urllib.quote_plus(team)
-        return super(UCPAccess, self).get_with_pagination("accounts/" + org_encoded + "/teams/" + team + "/members/", 'members', 'member.id', self.__get_members_page_handler)
+        team_encoded = urllib.quote(team)
+        return super(UCPAccess, self).get_with_pagination("accounts/" + org_encoded + "/teams/" + team_encoded + "/members/", 'members', 'member.id', self.__get_members_page_handler)
 
     def __get_members_page_handler(self, result, page_results):
         for member in page_results:

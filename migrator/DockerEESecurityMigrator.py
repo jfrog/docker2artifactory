@@ -62,7 +62,7 @@ class DockerEESecurityMigrator(object):
             self.log.info("Fetching " + organization + " teams...")
             teams = self.ucp_access.get_teams(organization)
             for team in teams:
-                group = organization + '-' + team
+                group = organization + '-' + team.replace(' ', '-')
                 self.log.info("Fetching " + group + " members...")
                 members = self.ucp_access.get_members(organization, team)
                 self.log.info("Fetching " + group + " permissions...")
