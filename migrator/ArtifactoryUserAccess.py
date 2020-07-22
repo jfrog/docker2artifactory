@@ -39,6 +39,7 @@ class ArtifactoryUserAccess(ArtifactoryBaseAccess):
         if stat == 201:
             return True
         self.log.warn("Failed to create user with status %s: %s", stat, resp)
+        self.log.warn("Body of failed request: " + body)
         return False
 
     '''

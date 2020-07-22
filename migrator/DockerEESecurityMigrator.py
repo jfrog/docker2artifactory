@@ -56,6 +56,7 @@ class DockerEESecurityMigrator(object):
         self.log.info("Fetching users data...")
         art_users = self.art_access.get_users()
         self.users = self.ucp_access.get_users(art_users)
+        '''
         self.log.info("Fetching organizations...")
         self.organizations = self.ucp_access.get_organizations()
         for organization in self.organizations:
@@ -79,6 +80,7 @@ class DockerEESecurityMigrator(object):
                                 'admin': [], 'read-only': [], 'read-write': []
                             }
                         self.repository_permissions[permission['repository']][permission['accessLevel']].append(group)
+        '''
 
     '''
         Create Groups
@@ -134,7 +136,8 @@ class DockerEESecurityMigrator(object):
                         [self.repository], users={user: ["d","w","n","r","m"]},
                         include_pattern=user + '/**')
                     if not permission_created:
-                        raise Exception("Failed to create permission.")
+                        self.error("Unable to create permissions for user %s" % user)
+                        #raise Exception("Failed to create permission.")
                     self.__increment_counter('permissions')
 
     '''
