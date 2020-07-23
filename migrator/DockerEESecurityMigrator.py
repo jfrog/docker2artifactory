@@ -136,7 +136,7 @@ class DockerEESecurityMigrator(object):
                         [self.repository], users={user: ["d","w","n","r","m"]},
                         include_pattern=user + '/**')
                     if not permission_created:
-                        self.error("Unable to create permissions for user %s" % user)
+                        self.log.error("Unable to create permissions for user %s" % user)
                         #raise Exception("Failed to create permission.")
                     self.__increment_counter('permissions')
 
