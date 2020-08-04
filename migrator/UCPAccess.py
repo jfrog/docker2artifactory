@@ -9,7 +9,7 @@ import logging
 
 '''
 class UCPAccess(DockerEEHTTPAccess):
-    def __init__(self, url, username=None, password=None, ignore_cert=False, exlog=False):
+    def __init__(self, url, username=None, password=None, ignore_cert=False, exlog=True):
         super(UCPAccess, self).__init__(url, username, password, ignore_cert, exlog)
         self.log = logging.getLogger(__name__)
 

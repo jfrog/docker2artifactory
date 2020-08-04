@@ -8,7 +8,7 @@ import logging
 
 '''
 class DTRAccess(DockerEEHTTPAccess):
-    def __init__(self, url, username=None, password=None, ignore_cert=False, exlog=False):
+    def __init__(self, url, username=None, password=None, ignore_cert=False, exlog=True):
         super(DTRAccess, self).__init__(url, username, password, ignore_cert, exlog)
         self.log = logging.getLogger(__name__)
 

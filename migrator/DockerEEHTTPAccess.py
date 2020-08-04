@@ -4,7 +4,7 @@ import logging
     Simple API for accessing Docker EE resources
 '''
 class DockerEEHTTPAccess(HTTPAccess):
-    def __init__(self, url, username=None, password=None, ignore_cert=False, exlog=False):
+    def __init__(self, url, username=None, password=None, ignore_cert=False, exlog=True):
         super(DockerEEHTTPAccess, self).__init__(url, username, password, ignore_cert, exlog)
         self.log = logging.getLogger(__name__)
         self.page_size = 100

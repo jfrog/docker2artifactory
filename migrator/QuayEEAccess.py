@@ -10,7 +10,7 @@ import urllib
     
 '''
 class QuayEEAccess:
-    def __init__(self, url, token, ignore_cert=False, exlog=False):
+    def __init__(self, url, token, ignore_cert=False, exlog=True):
         self.log = logging.getLogger(__name__)
         self.url = url
         self.token = token

@@ -12,7 +12,7 @@ import os
 
 
 class HTTPAccess(object):
-    def __init__(self, url, username=None, password=None, ignore_cert=False, exlog=False):
+    def __init__(self, url, username=None, password=None, ignore_cert=False, exlog=True):
         self.log = logging.getLogger(__name__)
         self.url = url.rstrip('/')
 
@@ -235,6 +235,7 @@ class PutRequest(urllib2.Request):
 class CleanAuthenticationHeadersOnRedirectHandler(urllib2.HTTPRedirectHandler):
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
+        print "Handling redirect to %s with code %d" % (newurl, code)
         m = req.get_method()
         if (code in (301, 302, 303, 307) and m in ("GET", "HEAD")
             or code in (301, 302, 303) and m == "POST"):
