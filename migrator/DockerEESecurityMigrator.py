@@ -56,7 +56,6 @@ class DockerEESecurityMigrator(object):
         self.log.info("Fetching users data...")
         art_users = self.art_access.get_users()
         self.users = self.ucp_access.get_users(art_users)
-        '''
         self.log.info("Fetching organizations...")
         self.organizations = self.ucp_access.get_organizations()
         for organization in self.organizations:
@@ -71,6 +70,10 @@ class DockerEESecurityMigrator(object):
                 if (members and permissions):
                     self.groups.append(group)
                     for member in members:
+                        # If a member is part of a team, we want that user to be created in Artifactory
+                        if not member in self.users:
+                            self.log.info("Found user '%s' in team but not in Artifactory.")
+                            self.users.append(member)
                         if not member in self.users_groups:
                             self.users_groups[member] = []
                         self.users_groups[member].append(group)
@@ -80,7 +83,6 @@ class DockerEESecurityMigrator(object):
                                 'admin': [], 'read-only': [], 'read-write': []
                             }
                         self.repository_permissions[permission['repository']][permission['accessLevel']].append(group)
-        '''
 
     '''
         Create Groups
@@ -106,25 +108,24 @@ class DockerEESecurityMigrator(object):
         for user in self.users:
             if user not in self.ignored_users:
                 user_exists = self.art_access.user_exists(user)
-                if user in self.users_groups:
-                    for group in self.users_groups[user]:
-                        self.art_access.add_user_to_group(user, group)
-                if not self.overwrite and user_exists:
-                    self.log.info("User %s exists. Skipping...", user)
+                if user_exists:
+                    self.log.info("User %s exists. Skipping user creation...", user)
+                    if user in self.users_groups:
+                        for group in self.users_groups[user]:
+                            self.art_access.add_user_to_group(user, group)
                 else:
-                    self.log.error("We should not get here since we are only doing existing users..")
-                    pass
-                    '''
                     self.log.info("Creating user %s", user)
                     groups = None
                     if user in self.users_groups:
                         groups = self.users_groups[user]
                     user_created = self.art_access.create_user(user, user + '@' + self.default_email_suffix,
-                        self.default_password, groups)
-                    if not user_created:
-                        raise Exception("Failed to create user.")
-                    self.__increment_counter('users')
-                    '''
+                        self.default_password, groups, admin=False, disablePassword=True)
+                    if user_created:
+                        self.__increment_counter('users')
+                    else:
+                        #raise Exception("Failed to create user.")
+                        self.log.error("Unable to user %s" % user)
+
 
                 permission_name=self.permission_name_prefix + user
                 permission_exists = self.art_access.permission_exists(permission_name)
@@ -135,10 +136,11 @@ class DockerEESecurityMigrator(object):
                     permission_created = self.art_access.create_permission(permission_name,
                         [self.repository], users={user: ["d","w","n","r","m"]},
                         include_pattern=user + '/**')
-                    if not permission_created:
-                        self.log.error("Unable to create permissions for user %s" % user)
+                    if permission_created:
+                        self.__increment_counter('permissions')
+                    else:
                         #raise Exception("Failed to create permission.")
-                    self.__increment_counter('permissions')
+                        self.log.error("Unable to create permissions for user %s" % user)
 
     '''
         Create Permissions

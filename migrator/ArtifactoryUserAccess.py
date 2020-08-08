@@ -25,12 +25,14 @@ class ArtifactoryUserAccess(ArtifactoryBaseAccess):
         @param email - The email of the user
         @param groups - The groups the user should belong to (defaults to none)
         @param admin - True if this user should be an admin (defaults to false)
+        @param disablePassword - Disables the internal password from use
     '''
-    def create_user(self, username, email, password, groups=None, admin=False):
+    def create_user(self, username, email, password, groups=None, admin=False, disablePassword=False):
         body = {
             "email": email,
             "password": password,
-            "admin": admin
+            "admin": admin,
+            "internalPasswordDisabled": disablePassword
         }
         if groups:
             body.update({"groups": groups})
