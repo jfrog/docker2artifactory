@@ -53,7 +53,7 @@ class ArtifactoryUserAccess(ArtifactoryBaseAccess):
         user_details = self.get_call_wrapper('/api/security/users/%s' % username)
         if not user_details:
             self.log.error("Unable to retrieve user %s" % username)
-        if not user_details['groups']:
+        if 'groups' not in user_details:
             user_details['groups'] = []
 
         # If already in the group, don't try to add it again
