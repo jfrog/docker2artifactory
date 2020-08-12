@@ -22,8 +22,15 @@ class HTTPAccess(object):
         self.json = re.compile(r'^application/(?:[^;]+\+)?json(?:;.+)?$')
         self.xml = re.compile(r'^application/(?:[^;]+\+)?xml(?:;.+)?$')
         self.exlog = exlog
-        # Install custom redirect handler
-        opener = urllib2.build_opener(CleanAuthenticationHeadersOnRedirectHandler)
+        # Install custom handlers for handling SSL (ignore certs) and redirects
+        opener=None
+        if self.ignore_cert:
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            opener = urllib2.build_opener(urllib2.HTTPSHandler(context=ctx), CleanAuthenticationHeadersOnRedirectHandler)
+        else:
+            opener = urllib2.build_opener(CleanAuthenticationHeadersOnRedirectHandler)
         urllib2.install_opener(opener)
         # Set up the connection
         headers = {'User-Agent': 'Docker registry to Artifactory migrator'}
@@ -123,13 +130,7 @@ class HTTPAccess(object):
         req = MethodRequest(url, body, headers, method=method)
         self.log.info("Sending %s request to %s.", method, url)
         try:
-            if self.ignore_cert:
-                ctx = ssl.create_default_context()
-                ctx.check_hostname = False
-                ctx.verify_mode = ssl.CERT_NONE
-                resp = urllib2.urlopen(req, context=ctx)
-            else:
-                resp = urllib2.urlopen(req)
+            resp = urllib2.urlopen(req)
             stat = resp.getcode()
         except urllib2.HTTPError as ex:
             if self.exlog:
@@ -190,12 +191,7 @@ class HTTPAccess(object):
                 url = urlparse.urlunsplit((scheme, host, rootpath + path, '', ''))
                 req = PutRequest(url, mmapped_file_as_string, artifact_headers)
                 try:
-                    if self.ignore_cert:
-                        ctx = ssl.create_default_context()
-                        ctx.check_hostname = False
-                        ctx.verify_mode = ssl.CERT_NONE
-                        stat = urllib2.urlopen(req, context=ctx).getcode()
-                    else: stat = urllib2.urlopen(req).getcode()
+                   stat = urllib2.urlopen(req).getcode()
                 except urllib2.HTTPError as ex:
                     msg = "Error uploading artifact:\n%s"
                     self.log.exception(msg, ex.read())
@@ -233,6 +229,9 @@ class PutRequest(urllib2.Request):
         return 'PUT'
 
 class CleanAuthenticationHeadersOnRedirectHandler(urllib2.HTTPRedirectHandler):
+    def __init__(self, context=None):
+        self.context=context
+
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         print "Handling redirect to %s with code %d" % (newurl, code)
