@@ -1,5 +1,6 @@
 from DockerEEHTTPAccess import DockerEEHTTPAccess
 import logging
+import urllib
 '''
     Simple API for accessing DTR resources
 
@@ -24,7 +25,8 @@ class DTRAccess(DockerEEHTTPAccess):
         @return None if there was an error, else the a list of permissions of a team
     '''
     def get_team_permissions(self, organization, team):
-        return super(DTRAccess, self).get_with_pagination('api/v0/accounts/' + organization + '/teams/' + team + '/repositoryAccess',
+        team_encoded = urllib.quote(team)
+        return super(DTRAccess, self).get_with_pagination('api/v0/accounts/' + organization + '/teams/' + team_encoded + '/repositoryAccess',
             'repositoryAccessList', 'repository.id', self.__get_team_permissions_page_handler,
             pageSizeQueryParam='pageSize', pageStartQueryParam='pageStart')
 
