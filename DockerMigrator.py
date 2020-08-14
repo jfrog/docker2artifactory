@@ -48,7 +48,7 @@ def add_art_access(parser):
     art_group.add_argument('artifactory', help='The destination Artifactory URL')
     art_group.add_argument('username', help='The username to use for authentication to Artifactory')
     art_group.add_argument('password', help='The password to use for authentication to Artifactory')
-    art_group.add_argument('repo', help='The docker repository')
+    art_group.add_argument('repo', help='The docker repository in Artifactory to store the images')
 
 # Sets up the argument parser for the application
 

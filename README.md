@@ -85,7 +85,7 @@ artifactory:
   artifactory           The destination Artifactory URL
   username              The username to use for authentication to Artifactory
   password              The password to use for authentication to Artifactory
-  repo                  The docker repository
+  repo                  The docker repository in Artifactory to store the images
 ```
 
 #### Importing from DockerHub
@@ -133,7 +133,7 @@ artifactory:
   artifactory           The destination Artifactory URL
   username              The username to use for authentication to Artifactory
   password              The password to use for authentication to Artifactory
-  repo                  The docker repository
+  repo                  The docker repository in Artifactory to store the images
 ```
 
 ### Quay Enterprise Edition registry migrator
@@ -184,7 +184,7 @@ artifactory:
   artifactory           The destination Artifactory URL
   username              The username to use for authentication to Artifactory
   password              The password to use for authentication to Artifactory
-  repo                  The docker repository
+  repo                  The docker repository in Artifactory to store the images
 
 ```
 
@@ -240,7 +240,7 @@ artifactory:
   artifactory           The destination Artifactory URL
   username              The username to use for authentication to Artifactory
   password              The password to use for authentication to Artifactory
-  repo                  The docker repository
+  repo                  The docker repository in Artifactory to store the images
 ```
 
 
@@ -281,7 +281,7 @@ artifactory:
   artifactory           The destination Artifactory URL
   username              The username to use for authentication to Artifactory
   password              The password to use for authentication to Artifactory
-  repo                  The docker repository
+  repo                  The docker repository in Artifactory to store the images
 ```
 
 ### Image file format
@@ -352,7 +352,7 @@ artifactory:
   artifactory        The destination Artifactory URL
   username           The username to use for authentication to Artifactory
   password           The password to use for authentication to Artifactory
-  repo               The docker repository
+  repo               The docker repository in Artifactory to store the images
 ```
 
 ### Quay EE Security Migration
@@ -400,7 +400,7 @@ artifactory:
   artifactory       The destination Artifactory URL
   username          The username to use for authentication to Artifactory
   password          The password to use for authentication to Artifactory
-  repo              The docker repository
+  repo              The docker repository in Artifactory to store the images
  ```
 
 
