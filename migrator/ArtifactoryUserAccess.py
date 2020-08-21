@@ -17,7 +17,7 @@ class ArtifactoryUserAccess(ArtifactoryBaseAccess):
         @param username - The username to check for
     '''
     def user_exists(self, username):
-        return bool(self.get_call_wrapper('/api/security/users/' + username))
+        return bool(self.get_call_wrapper('/api/security/users/' + urllib.quote(username.encode('utf8'))))
 
     '''
         Creates or replaces a user with the specified username
@@ -37,7 +37,7 @@ class ArtifactoryUserAccess(ArtifactoryBaseAccess):
         if groups:
             body.update({"groups": groups})
 
-        resp, stat = self.do_unprocessed_request(method='PUT', path='/api/security/users/' + username, body=body)
+        resp, stat = self.do_unprocessed_request(method='PUT', path='/api/security/users/' + urllib.quote(username.encode('utf8')), body=body)
         if stat == 201:
             return True
         self.log.warn("Failed to create user with status %s: %s", stat, resp)
@@ -50,7 +50,7 @@ class ArtifactoryUserAccess(ArtifactoryBaseAccess):
         @param group - The group to add the user to
     '''
     def add_user_to_group(self, username, group):
-        user_details = self.get_call_wrapper('/api/security/users/%s' % username)
+        user_details = self.get_call_wrapper('/api/security/users/%s' % urllib.quote(username.encode('utf8')))
         if not user_details:
             self.log.error("Unable to retrieve user %s" % username)
         if 'groups' not in user_details:
@@ -62,7 +62,7 @@ class ArtifactoryUserAccess(ArtifactoryBaseAccess):
 
         user_details['groups'].append(group)
 
-        resp, stat = self.do_unprocessed_request(method='POST', path='/api/security/users/' + username, body=user_details)
+        resp, stat = self.do_unprocessed_request(method='POST', path='/api/security/users/' + urllib.quote(username.encode('utf8')), body=user_details)
         if stat == 201:
             return True
         self.log.warn("Failed to update user with status %s: %s", stat, resp)
@@ -73,7 +73,7 @@ class ArtifactoryUserAccess(ArtifactoryBaseAccess):
         @param name - The group name to check for
     '''
     def group_exists(self, name):
-        return bool(self.get_call_wrapper('/api/security/groups/' + name))
+        return bool(self.get_call_wrapper('/api/security/groups/' + urllib.quote(name.encode('utf8'))))
 
     '''
         Creates or replaces a group identified with the group name
@@ -88,7 +88,7 @@ class ArtifactoryUserAccess(ArtifactoryBaseAccess):
             "autoJoin": auto_join
         }
 
-        resp, stat = self.do_unprocessed_request(method='PUT', path='/api/security/groups/' + name, body=body)
+        resp, stat = self.do_unprocessed_request(method='PUT', path='/api/security/groups/' + urllib.quote(name.encode('utf8')), body=body)
         if stat == 201:
             return True
         self.log.warn("Failed to create group with status %s: %s", stat, resp)
@@ -99,7 +99,7 @@ class ArtifactoryUserAccess(ArtifactoryBaseAccess):
         @param name - The name of the permission
     '''
     def permission_exists(self, name):
-        name_url_encoded = urllib.quote_plus(name)
+        name_url_encoded = urllib.quote(name.encode('utf8'))
         return bool(self.get_call_wrapper('/api/security/permissions/' + name_url_encoded))
 
     '''
@@ -139,7 +139,7 @@ class ArtifactoryUserAccess(ArtifactoryBaseAccess):
         if exclude_pattern:
             body.update({"excludesPattern": exclude_pattern})
 
-        name_url_encoded = urllib.quote_plus(name)
+        name_url_encoded = urllib.quote(name.encode('utf8'))
         resp, stat = self.do_unprocessed_request(method='PUT', path='/api/security/permissions/' + name_url_encoded, body=body)
         if stat == 201:
             return True

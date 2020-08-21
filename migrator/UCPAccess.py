@@ -50,7 +50,7 @@ class UCPAccess(DockerEEHTTPAccess):
         @return None if there was an error, else the a list of available team of a given organization
     '''
     def get_teams(self, organization):
-        org_encoded = urllib.quote_plus(organization)
+        org_encoded = urllib.quote(organization.encode('utf8'))
         return super(UCPAccess, self).get_with_pagination("accounts/" + org_encoded + "/teams/", 'teams', 'name', self.__get_teams_page_handler)
 
     def __get_teams_page_handler(self, result, page_results):
@@ -62,8 +62,8 @@ class UCPAccess(DockerEEHTTPAccess):
         @return None if there was an error, else the a list of available members of a given team
     '''
     def get_members(self, organization, team):
-        org_encoded = urllib.quote_plus(organization)
-        team_encoded = urllib.quote(team)
+        org_encoded = urllib.quote(organization.encode('utf8'))
+        team_encoded = urllib.quote(team.encode('utf8'))
         return super(UCPAccess, self).get_with_pagination("accounts/" + org_encoded + "/teams/" + team_encoded + "/members/", 'members', 'member.id', self.__get_members_page_handler)
 
     def __get_members_page_handler(self, result, page_results):

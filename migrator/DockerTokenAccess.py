@@ -1,4 +1,5 @@
 from HTTPAccess import HTTPAccess
+import urllib
 import urlparse
 import logging
 
@@ -75,7 +76,7 @@ class DockerTokenAccess(HTTPAccess):
         if len(components) > 0:
             url = url + '?'
             for key, value in components.iteritems():
-                url = url + str(key) + '=' + str(value).replace('"', '') + "&"
+                url = url + urllib.quote(key.encode('utf8')) + '=' + urllib.quote(value.encode('utf8')).replace('"', '') + "&"
             url = url[:-1]
         return url
 

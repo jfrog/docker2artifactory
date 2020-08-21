@@ -5,6 +5,7 @@ import re
 import hashlib
 import logging
 import json
+import urllib
 
 
 '''
@@ -130,7 +131,7 @@ class DockerRegistryAccess:
             'Accept': 'application/vnd.docker.distribution.manifest.v2+json, '
                       'application/vnd.docker.distribution.manifest.v1+json, application/json'
         }
-        response = self.access.get_raw_call_wrapper(url="/v2/" + image + "/manifests/" + reference, headers=headers)
+        response = self.access.get_raw_call_wrapper(url="/v2/" + urllib.quote(image.encode('utf8')) + "/manifests/" + urllib.quote(reference.encode('utf8')), headers=headers)
         if response.getcode() == 200:
             try:
                 with open(file, 'wb') as f:
@@ -149,7 +150,7 @@ class DockerRegistryAccess:
         @param file - The file to store the contents into
     '''
     def download_layer(self, image, layer, file):
-        response = self.access.get_raw_call_wrapper(url="/v2/" + image + "/blobs/" + layer)
+        response = self.access.get_raw_call_wrapper(url="/v2/" + urllib.quote(image.encode('utf8')) + "/blobs/" + layer)
         # Write the contents into a file and verify the sha256 while we are at it
         if response.getcode() == 200:
             try:
