@@ -281,12 +281,12 @@ def setup_art_access(artifactory_url, username, password, repo, ignore_cert):
 def populate_tags(image_names, source, q):
     print "Populating set of image/tags..."
     for image_name in image_names:
-        image_name = str(image_name)
+        image_name = unicode(image_name)
         tags = source.get_tags(image_name)
         if tags:
             print "Found %d tags for repository %s." % (len(tags), image_name)
             for tag in tags:
-                tag = str(tag)
+                tag = unicode(tag)
                 q.put_nowait((image_name, tag))
 
 

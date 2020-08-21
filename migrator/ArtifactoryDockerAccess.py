@@ -1,6 +1,7 @@
 from ArtifactoryBaseAccess import ArtifactoryBaseAccess
 import logging
 from distutils.version import LooseVersion
+import urllib
 
 '''
     Simple API for uploading Docker images to Artifactory
@@ -25,7 +26,7 @@ class ArtifactoryDockerAccess(ArtifactoryBaseAccess):
         @param username - The username to check for
     '''
     def user_exists(self, username):
-        return bool(self.get_call_wrapper('/api/security/users/' + username))
+        return bool(self.get_call_wrapper('/api/security/users/' + urllib.quote(username.encode('utf8'))))
 
     '''
         Creates or replaces a user with the specified username
@@ -44,7 +45,7 @@ class ArtifactoryDockerAccess(ArtifactoryBaseAccess):
         if groups:
             body.update({"groups": groups})
 
-        resp, stat = self.do_unprocessed_request(method='PUT', path='/api/security/users/' + username, body=body)
+        resp, stat = self.do_unprocessed_request(method='PUT', path='/api/security/users/' + urllib.quote(username.encode('utf8')), body=body)
         if stat == 201:
             return True
         return False
@@ -63,7 +64,7 @@ class ArtifactoryDockerAccess(ArtifactoryBaseAccess):
             'X-Checksum-Deploy': 'true',
             'X-Checksum-Sha1': sha1,
         }
-        path_fragment = "%s/%s/sha256__%s;sha256=%s" % (image, tag, layer, layer)
+        path_fragment = "%s/%s/sha256__%s;sha256=%s" % (urllib.quote(image.encode('utf8')), urllib.quote(tag.encode('utf8')), layer, layer)
         resp, stat = self.do_unprocessed_request(method='PUT', path=self.__assemble_path(path_fragment),
                                                  headers=headers)
         if stat == 201:
@@ -87,7 +88,7 @@ class ArtifactoryDockerAccess(ArtifactoryBaseAccess):
             'X-Checksum-Deploy': 'true',
             'X-Checksum-Sha256': layer,
         }
-        path_fragment = "%s/%s/sha256__%s;sha256=%s" % (image, tag, layer, layer)
+        path_fragment = "%s/%s/sha256__%s;sha256=%s" % (urllib.quote(image.encode('utf8')), urllib.quote(tag.encode('utf8')), layer, layer)
         resp, stat = self.do_unprocessed_request(method='PUT', path=self.__assemble_path(path_fragment),
                                                  headers=headers)
         if stat == 201:
@@ -105,7 +106,7 @@ class ArtifactoryDockerAccess(ArtifactoryBaseAccess):
     def upload_layer(self, image, tag, layer, file):
         self.log.debug("Uploading layer %s for %s/%s using file at %s" % (layer, image, tag, file))
         #path_fragment = "/%s/%s/_uploads/sha256__%s;sha256=%s" % (self.repo, image, layer, layer)
-        path_fragment = "/%s/%s/%s/sha256__%s;sha256=%s" % (self.repo, image, tag, layer, layer)
+        path_fragment = "/%s/%s/%s/sha256__%s;sha256=%s" % (urllib.quote(self.repo.encode('utf8')), urllib.quote(image.encode('utf8')), urllib.quote(tag.encode('utf8')), layer, layer)
         stat = self.deployFileByStream(path=path_fragment, file_path=file)
         return stat == 201
 
@@ -122,7 +123,7 @@ class ArtifactoryDockerAccess(ArtifactoryBaseAccess):
         headers = {
             'Content-Type': type
         }
-        stat = self.deployFileByStream(path=self.__assemble_manifest_path(image, tag), file_path=file, headers=headers)
+        stat = self.deployFileByStream(path=self.__assemble_manifest_path(urllib.quote(image.encode('utf8')), urllib.quote(tag.encode('utf8'))), file_path=file, headers=headers)
         return stat == 201
 
     '''
@@ -147,7 +148,7 @@ class ArtifactoryDockerAccess(ArtifactoryBaseAccess):
         @param tag - The tag name
     '''
     def image_exists(self, image, tag):
-        return self.head_call_wrapper(self.__assemble_manifest_path(image, tag))
+        return self.head_call_wrapper(self.__assemble_manifest_path(urllib.quote(image.encode('utf8')), urllib.quote(tag.encode('utf8'))))
 
 
 

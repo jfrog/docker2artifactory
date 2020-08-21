@@ -1,6 +1,5 @@
 import logging
 import copy
-import urllib
 from threading import Thread
 from Queue import Queue
 

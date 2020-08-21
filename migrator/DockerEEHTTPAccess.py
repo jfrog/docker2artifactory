@@ -1,5 +1,6 @@
 from HTTPAccess import HTTPAccess
 import logging
+import urllib
 '''
     Simple API for accessing Docker EE resources
 '''
@@ -25,7 +26,7 @@ class DockerEEHTTPAccess(HTTPAccess):
         if (order):
             page_path = page_path + '&order=' + order
         if (start):
-            page_path = page_path + '&' + pageStartQueryParam + '=' + str(start)
+            page_path = page_path + '&' + pageStartQueryParam + '=' + urllib.quote(start.encode('utf8'))
         page_results = self.get_call_wrapper(page_path)[attribute]
         if (start and page_results):
             page_results.pop(0)
@@ -39,5 +40,5 @@ class DockerEEHTTPAccess(HTTPAccess):
         return result
 
     def userExists(self, username):
-        return self.get_call_wrapper('/accounts/%s' % username) is not False
+        return self.get_call_wrapper('/accounts/%s' % urllib.quote(username.encode('utf8'))) is not False
 

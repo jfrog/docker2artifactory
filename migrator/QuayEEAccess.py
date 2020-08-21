@@ -68,7 +68,7 @@ class QuayEEAccess:
         @param organization - The name of the organization
     '''
     def get_teams_in_org(self, organization):
-        path = "api/v1/organization/%s" % urllib.quote_plus(organization)
+        path = "api/v1/organization/%s" % urllib.quote(organization.encode('utf8'))
         resp = self.access.dorequest(method='GET', path=path, headers=self.headers)
         if resp and 'teams' in resp:
             return resp['teams']
@@ -80,7 +80,7 @@ class QuayEEAccess:
         @param team - The name of the team
     '''
     def get_users_in_team(self, organization, team):
-        path = "/api/v1/organization/%s/team/%s/members" % (urllib.quote_plus(organization), urllib.quote_plus(team))
+        path = "/api/v1/organization/%s/team/%s/members" % (urllib.quote(organization.encode('utf8')), urllib.quote(team.encode('utf8')))
         resp = self.access.dorequest(method='GET', path=path, headers=self.headers)
         if resp and 'members' in resp:
             return resp['members']
@@ -91,7 +91,7 @@ class QuayEEAccess:
         @param organization - The name of the organization
     '''
     def get_robots_in_org(self, organization):
-        path = "/api/v1/organization/%s/robots" % urllib.quote_plus(organization)
+        path = "/api/v1/organization/%s/robots" % urllib.quote(organization.encode('utf8'))
         resp = self.access.dorequest(method='GET', path=path, headers=self.headers)
         if resp and 'robots' in resp:
             return resp['robots']
@@ -102,7 +102,7 @@ class QuayEEAccess:
         @param organization - The name of the organization
     '''
     def get_collaborators_in_org(self, organization):
-        path = "/api/v1/organization/%s/collaborators" % urllib.quote_plus(organization)
+        path = "/api/v1/organization/%s/collaborators" % urllib.quote(organization.encode('utf8'))
         resp = self.access.dorequest(method='GET', path=path, headers=self.headers)
         if resp and 'collaborators' in resp:
             return resp['collaborators']
@@ -113,7 +113,7 @@ class QuayEEAccess:
         @param repository - The repository name
     '''
     def get_user_permissions_for_repo(self, repository):
-        path = "/api/v1/repository/%s/permissions/user/" % urllib.quote_plus(repository)
+        path = "/api/v1/repository/%s/permissions/user/" % urllib.quote(repository.encode('utf8'))
         resp = self.access.dorequest(method='GET', path=path, headers=self.headers)
         if resp and 'permissions' in resp:
             return resp['permissions']
@@ -124,7 +124,7 @@ class QuayEEAccess:
         @param repository - The repository name
     '''
     def get_team_permissions_for_repo(self, repository):
-        path = "/api/v1/repository/%s/permissions/team/" % urllib.quote_plus(repository)
+        path = "/api/v1/repository/%s/permissions/team/" % urllib.quote(repository.encode('utf8'))
         resp = self.access.dorequest(method='GET', path=path, headers=self.headers)
         if resp and 'permissions' in resp:
             return resp['permissions']
@@ -136,8 +136,8 @@ class QuayEEAccess:
         @param team - The team name
     '''
     def get_team_permissions_for_org(self, organization, team):
-        path = "/api/v1/organization/%s/team/%s/permissions" % (urllib.quote_plus(organization),
-                                                                urllib.quote_plus(team))
+        path = "/api/v1/organization/%s/team/%s/permissions" % (urllib.quote(organization.encode('utf8')),
+                                                                urllib.quote(team.encode('utf8')))
         resp = self.access.dorequest(method='GET', path=path, headers=self.headers)
         if resp and 'permissions' in resp:
             return resp['permissions']
@@ -149,8 +149,8 @@ class QuayEEAccess:
         @param robot - The robot name
     '''
     def get_robot_permissions_for_organization(self, organization, robot):
-        path = "/api/v1/organization/}%s/robots/%s/permissions" % (urllib.quote_plus(organization),
-                                                                urllib.quote_plus(robot))
+        path = "/api/v1/organization/}%s/robots/%s/permissions" % (urllib.quote(organization.encode('utf8')),
+                                                                urllib.quote(robot.encode('utf8')))
         resp = self.access.dorequest(method='GET', path=path, headers=self.headers)
         if resp and 'permissions' in resp:
             return resp['permissions']

@@ -1,5 +1,6 @@
 from HTTPAccess import HTTPAccess
 import logging
+import urllib
 '''
     Simple API for accessing various Quay resources
     * Limited
@@ -23,7 +24,7 @@ class QuayAccess:
     '''
     def get_catalog(self):
         repos = None
-        path = "api/v1/repository?public=true&namespace=%s" % self.namespace
+        path = "api/v1/repository?public=true&namespace=%s" % urllib.quote(self.namespace.encode('utf8'))
         resp, stat = self.access.do_unprocessed_request(method='GET', path=path, headers=self.headers)
         if stat == 200:
             processed_response = self.access.process_response(resp)
