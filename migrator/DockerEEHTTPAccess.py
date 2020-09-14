@@ -26,7 +26,10 @@ class DockerEEHTTPAccess(HTTPAccess):
             page_path = page_path + '&order=' + order
         if (start):
             page_path = page_path + '&' + pageStartQueryParam + '=' + str(start)
-        page_results = self.get_call_wrapper(page_path)[attribute]
+        if (attribute):
+            page_results = self.get_call_wrapper(page_path)[attribute]
+        else:
+            page_results = self.get_call_wrapper(page_path)
         if (start and page_results):
             page_results.pop(0)
         return page_results
