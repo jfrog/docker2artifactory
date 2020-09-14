@@ -34,19 +34,15 @@ class DTRAccess(DockerEEHTTPAccess, DockerRegistryAccess):
         Return a full list of all the repositories from DTR
     '''
     def get_repositories(self):
-        return super(DTRAccess, self).get_with_pagination('api/v0/repositories', 'repositories', 'full_name',
-                                                          self.__get_repositories_page_handler,
-                                                          pageSizeQueryParam='pageSize',
-                                                          pageStartQueryParam='pageStart')
+        return super(DTRAccess, self).get_with_header_pagination('api/v0/repositories', 'repositories',
+                                                          self.__get_repositories_page_handler)
 
     '''
         Return a full list of all tags for a particular image in DTR
     '''
     def get_image_tags(self, image):
-        return super(DTRAccess, self).get_with_pagination('api/v0/repositories/%s/tags' % image, None, 'digest',
-                                                          self.__get_repositories_page_handler,
-                                                          pageSizeQueryParam='pageSize',
-                                                          pageStartQueryParam='pageStart')
+        return super(DTRAccess, self).get_with_header_pagination('api/v0/repositories/%s/tags' % image, None,
+                                                          self.__get_tags_page_handler)
 
     def __get_team_permissions_page_handler(self, result, page_results):
         for permission in page_results:
