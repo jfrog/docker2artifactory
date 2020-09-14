@@ -55,7 +55,6 @@ class DTRAccess(DockerEEHTTPAccess, DockerRegistryAccess):
         for repository in page_results:
             # Enrich the info to allow paging
             full_name = "%s/%s" % (repository['namespace'], repository['name'])
-            repository['full_name'] = full_name
             result.append(full_name)
 
     def __get_tags_page_handler(self, result, page_results):
