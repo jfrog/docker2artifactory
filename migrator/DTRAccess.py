@@ -34,7 +34,7 @@ class DTRAccess(DockerEEHTTPAccess, DockerRegistryAccess):
         Return a full list of all the repositories from DTR
     '''
     def get_repositories(self):
-        return super(DTRAccess, self).get_with_pagination('api/v0/repositories', 'repositories', 'id',
+        return super(DTRAccess, self).get_with_pagination('api/v0/repositories', 'repositories', 'full_name',
                                                           self.__get_repositories_page_handler,
                                                           pageSizeQueryParam='pageSize',
                                                           pageStartQueryParam='pageStart')
@@ -57,7 +57,10 @@ class DTRAccess(DockerEEHTTPAccess, DockerRegistryAccess):
 
     def __get_repositories_page_handler(self, result, page_results):
         for repository in page_results:
-            result.append("%s/%s" % (repository['namespace'], repository['name']))
+            # Enrich the info to allow paging
+            full_name = "%s/%s" % (repository['namespace'], repository['name'])
+            repository['full_name'] = full_name
+            result.append(full_name)
 
     def __get_tags_page_handler(self, result, page_results):
         for tag in page_results:
