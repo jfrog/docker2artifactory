@@ -4,7 +4,7 @@ from threading import Thread
 from Queue import Queue
 
 class Migrator(object):
-    def __init__(self, source_registry, artifactory_access, work_queue, workers, overwrite, dir_path):
+    def __init__(self, source_registry, artifactory_access, work_queue, workers, overwrite, dir_path, source_project, target_subfolder):
         self.log = logging.getLogger(__name__)
         self.source = source_registry
         self.target = artifactory_access
@@ -14,7 +14,8 @@ class Migrator(object):
         self.overwrite = overwrite
         self.workers = workers
         self.dir_path = dir_path
-
+        self.source_project = source_project
+        self.target_subfolder = target_subfolder
     '''
         Iterates over the Queue until all images have been uploaded (or have failed to upload)
     '''
@@ -36,10 +37,18 @@ class Migrator(object):
         target = copy.deepcopy(self.target)
         while True:
             image, tag = self.work_queue.get()
+            target_image = image
+            if (self.source_project != ""):
+                if (self.target_subfolder == ""):
+                    target_image = target_image.replace(self.source_project+"/", "", 1)
+                else:
+                    target_image = target_image.replace(self.source_project, self.target_subfolder, 1)
+                print("changed target_image is: %s\n" %target_image)
+
             failure = True
             try:
-                if self.overwrite or not target.image_exists(image, tag):
-                    failure = not self.__upload_image(source, target, image, tag, idx)
+                if self.overwrite or not target.image_exists(target_image, tag):
+                    failure = not self.__upload_image(source, target, image, target_image, tag, idx)
                 else:  # Image already exists and we should not overwrite it
                     failure = False
                     self.skipped_queue.put((image, tag))
@@ -56,7 +65,7 @@ class Migrator(object):
         @image - The image name
         @tag - The tag name
     '''
-    def __upload_image(self, source, target, image, tag, idx):
+    def __upload_image(self, source, target, image, target_image, tag, idx):
         self.log.info("Uploading image %s/%s..." % (image, tag))
         layer_file = "%s/layer%d.out" % (self.dir_path, idx)
         manifest_file = "%s/manifest%d.json" % (self.dir_path, idx)
@@ -67,21 +76,21 @@ class Migrator(object):
             for layer in layers:
                 sha2 = layer.replace('sha256:', '')
                 # Try to perform a sha2 checksum deploy to avoid downloading the layer from source
-                if not target.checksum_deploy_sha2(image, tag, sha2):
+                if not target.checksum_deploy_sha2(target_image, tag, sha2):
                     # Sha2 checksum failed, download the file
                     sha1 = source.download_layer(image, layer, layer_file)
                     if sha1:
                         # Try a sha1 checksum deploy to avoid upload to target
-                        if not target.checksum_deploy_sha1(image, tag, sha2, sha1):
+                        if not target.checksum_deploy_sha1(target_image, tag, sha2, sha1):
                             # All checksum deploys failed, perform an actual upload
-                            if not target.upload_layer(image, tag, sha2, layer_file):
-                                self.log.error("Unable to upload layer %s for %s/%s" % (layer, image, tag))
+                            if not target.upload_layer(target_image, tag, sha2, layer_file):
+                                self.log.error("Unable to upload layer %s for %s/%s" % (layer, target_image, tag))
                                 return False
                     else:
                         self.log.error("Unable to get layer %s for %s/%s..." % (layer, image, tag))
                         return False
             # Finished uploading all layers, upload the manifest
-            if not target.upload_manifest(image, tag, type, manifest_file):
+            if not target.upload_manifest(target_image, tag, type, manifest_file):
                 self.log.error("Unable to deploy manifest for %s/%s..." % (image, tag))
                 return False
             return True

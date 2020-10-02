@@ -58,6 +58,8 @@ usage: python DockerMigrator.py generic [-h]
                                         [--ignore-certs] [--overwrite]
                                         [--num-of-workers WORKERS] [-v]
                                         [--image-file IMAGE_FILE]
+                                        [--source-project HARBOR_SOURCE_PROJECT]
+                                        [--target-subfolder RT_TARGET_SUBFOLDER]
                                         source artifactory username password
                                         repo
 
@@ -74,6 +76,12 @@ optional arguments:
                         file. Format of new line separated file: '<image-
                         name>:<tag>' OR '<image-name>' to import all tags of
                         that repository.
+  --source-project HARBOR_SOURCE_PROJECT_TO_BE_TRIMMED_OR_REPLACED
+                        Checks each images in --image-file; trims the image prefix that has the same 
+                        name with --source-project. Only works together with --image-file
+  --target-subfolder RT_TARGET_SUBFOLDER
+                        Add a subfolder as a prefix to the images in --image-file. 
+                        Only works together with --image-file and --source-project
 
 source:
   source                The source registry URL
