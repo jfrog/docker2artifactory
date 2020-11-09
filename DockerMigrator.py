@@ -42,6 +42,12 @@ def add_extra_args(parser):
                                 help='Limit the import to a set of images in the provided file. '
                                      'Format of new line separated file: \'<image-name>:<tag>\' OR '
                                      '\'<image-name>\' to import all tags of that repository.')
+    parser.add_argument('--source-project', dest='source_project', 
+                            help='define the source-project so that it can be trimmed during migration '
+                                 'if image-file and source-project exist.')
+    parser.add_argument('--target-subfolder', dest='target_subfolder', 
+                            help='after define --source-project, you can add another self-defined '
+                                 ' subfolder so it will be added before the image')
 
 
 def add_art_access(parser):
@@ -261,8 +267,19 @@ def common_migration(args, work_dir, source, registry="NA"):
     q = Queue.Queue()
     # Build the list of image/tags
     # If the user provides a set of images, don't query the upstream
+    source_project = ""
+    target_subfolder = ""
     if 'image_file' in args and args.image_file:
+        if 'source_project' in args and args.source_project:
+            print "Source project to be trimmed/replaced is: %s" % args.source_project
+            source_project = args.source_project
+
+        if 'target_subfolder' in args and args.target_subfolder:
+            print "Target subfolder to be added is: %s" % args.target_subfolder
+            target_subfolder = args.target_subfolder
         image_names, images = parse_image_file(args.image_file)
+        print "image_names is: %s" % image_names
+        print "images is: %s" % images
         for image_name, tag in images:
             q.put_nowait((image_name, tag))
     else:
@@ -276,7 +293,7 @@ def common_migration(args, work_dir, source, registry="NA"):
         populate_tags(image_names, source, q)
     if not q.empty():
         # Perform the migration
-        perform_migration(source, art_access, q, work_dir, registry)
+        perform_migration(source, art_access, q, work_dir, registry, source_project, target_subfolder)
     else:
         print "Nothing to migrate."
 
@@ -328,10 +345,10 @@ def populate_tags(image_names, source, q):
     @param work_dir - The temporary working directory
     @registry - The source registry (for info only)
 '''
-def perform_migration(source, art_access, q, work_dir, registry="NA"):
+def perform_migration(source, art_access, q, work_dir, registry="NA", source_project="", target_subfolder=""):
     print "Performing migration for %d image/tags." % q.qsize()
     art_access.report_usage(registry)
-    m = Migrator(source, art_access, q, args.workers, args.overwrite, work_dir)
+    m = Migrator(source, art_access, q, args.workers, args.overwrite, work_dir, source_project, target_subfolder)
     m.migrate()
     print "Migration finished."
     # Report any skipped images
